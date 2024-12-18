@@ -4,6 +4,8 @@ import { CloudflareStorage } from "@openauthjs/openauth/storage/cloudflare";
 import { Resource } from "sst";
 import type { ExecutionContext } from "@cloudflare/workers-types";
 import { GithubAdapter } from "@openauthjs/openauth/adapter/github";
+import { Hono } from "hono";
+import { cors } from "hono/cors";
 
 export default {
   async fetch(request: Request, env: {}, ctx: ExecutionContext) {
@@ -25,6 +27,18 @@ export default {
       },
     });
 
-    return auth.fetch(request, env, ctx);
+    const response = await new Hono()
+      .use(
+        "/*",
+        cors({
+          origin: ["http://localhost:3001"],
+          allowHeaders: ["authorization"],
+          allowMethods: ["GET", "OPTIONS"],
+        })
+      )
+      .route("/", auth)
+      .fetch(request, env, ctx);
+
+    return response;
   },
 };

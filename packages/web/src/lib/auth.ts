@@ -2,7 +2,7 @@ import { createClient } from "@openauthjs/openauth/client";
 
 export const auth = createClient({
   clientID: "web",
-  issuer: import.meta.env.VITE_AUTH_URL,
+  issuer: import.meta.env.VITE_ISSUER_URL,
 });
 
 export function redirectUrl() {

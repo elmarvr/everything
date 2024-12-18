@@ -15,6 +15,10 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
+    "Issuer": {
+      "type": "sst.sst.Linkable"
+      "url": string
+    }
     "Web": {
       "type": "sst.cloudflare.StaticSite"
       "url": string
@@ -25,6 +29,7 @@ declare module "sst" {
 import * as cloudflare from "@cloudflare/workers-types";
 declare module "sst" {
   export interface Resource {
+    "Api": cloudflare.Service
     "Auth": cloudflare.Service
     "KV": cloudflare.KVNamespace
   }

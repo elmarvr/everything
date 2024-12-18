@@ -20,6 +20,7 @@
   "dependencies": {
     "@tanstack/react-router": "^1.91.2",
     "@tanstack/router-devtools": "^1.91.2",
+    "hono": "4.6.14",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "valibot": "1.0.0-beta.9"

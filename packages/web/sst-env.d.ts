@@ -6,6 +6,10 @@ import "sst"
 export {}
 declare module "sst" {
   export interface Resource {
+    "Api": {
+      "type": "sst.cloudflare.Worker"
+      "url": string
+    }
     "Auth": {
       "type": "sst.cloudflare.Worker"
       "url": string
@@ -17,6 +21,10 @@ declare module "sst" {
     "GithubClientSecret": {
       "type": "sst.sst.Secret"
       "value": string
+    }
+    "Issuer": {
+      "type": "sst.sst.Linkable"
+      "url": string
     }
     "KV": {
       "type": "sst.cloudflare.Kv"
