@@ -1,11 +1,13 @@
+import { List } from "@everything/core/list";
 import { createClient } from "@openauthjs/openauth/client";
-import { Hono, type ExecutionContext, type MiddlewareHandler } from "hono";
+import { Hono, type MiddlewareHandler } from "hono";
+import { cors } from "hono/cors";
 import { Resource } from "sst";
 import { subjects } from "../subject";
-import { cors } from "hono/cors";
+import { ActorContext } from "@everything/core/actor";
+import { vValidator } from "@hono/valibot-validator";
 
-export const auth = async (c, next) => {
-  console.log("authHeader", "213");
+export const auth: MiddlewareHandler = async (c, next) => {
   const authHeader =
     c.req.header("authorization") ?? c.req.query("authorization");
 
@@ -32,9 +34,7 @@ export const auth = async (c, next) => {
       return next();
     }
 
-    c.set("actor", result.subject);
-
-    return next();
+    return ActorContext.with(result.subject, next);
   }
 
   return next();
@@ -49,15 +49,26 @@ const app = new Hono()
   .use(auth)
   .basePath("/api");
 
-const routes = app.get("auth/me", async (c) => {
-  const actor = c.get("actor");
+const routes = app
+  .get("/list", async (c) => {
+    const lists = await List.list();
+    return c.json({ lists });
+  })
+  .post("/list", vValidator("json", List.create.schema), async (c) => {
+    const input = c.req.valid("json");
+    const list = await List.create(input);
 
-  return c.json({ actor });
-});
+    return c.json({ list });
+  })
+  .get("/list/:id", async (c) => {
+    const id = c.req.param("id");
+    const list = await List.fromId(parseInt(id));
+
+    return c.json({ list });
+  });
+
 export type ApiType = typeof routes;
 
 export default {
-  fetch: (request: Request, env: {}, ctx: ExecutionContext) => {
-    return routes.fetch(request, env, ctx);
-  },
+  fetch: routes.fetch,
 };

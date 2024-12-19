@@ -16,10 +16,19 @@ export default $config({
     };
 
     const kv = new sst.cloudflare.Kv("KV", {});
+    const db = new sst.cloudflare.D1("DB", {});
+
+    const cloudflare = new sst.Linkable("Cloudflare", {
+      properties: {
+        accountId: process.env.CLOUDFLARE_DEFAULT_ACCOUNT_ID!,
+        databaseId: db.id,
+        token: process.env.CLOUDFLARE_API_TOKEN!,
+      },
+    });
 
     const auth = new sst.cloudflare.Worker("Auth", {
       handler: "./packages/workers/src/auth.ts",
-      link: [kv, secret.GithubClientId, secret.GithubClientSecret],
+      link: [kv, db, secret.GithubClientId, secret.GithubClientSecret],
       url: true,
     });
 
@@ -31,7 +40,7 @@ export default $config({
 
     const api = new sst.cloudflare.Worker("Api", {
       handler: "./packages/workers/src/api/index.ts",
-      link: [kv, auth, issuer],
+      link: [kv, db, auth, issuer],
       url: true,
     });
 

@@ -1,14 +1,17 @@
+import type { ExecutionContext } from "@cloudflare/workers-types";
 import { authorizer } from "@openauthjs/openauth";
-import { subjects } from "./subject";
+import { GithubAdapter } from "@openauthjs/openauth/adapter/github";
 import { CloudflareStorage } from "@openauthjs/openauth/storage/cloudflare";
 import { Resource } from "sst";
-import type { ExecutionContext } from "@cloudflare/workers-types";
-import { GithubAdapter } from "@openauthjs/openauth/adapter/github";
-import { Hono } from "hono";
-import { cors } from "hono/cors";
+import * as v from "valibot";
+import { subjects } from "./subject";
+import { createDrizzle } from "@everything/core/drizzle";
+import { User } from "@everything/core/user";
 
 export default {
-  async fetch(request: Request, env: {}, ctx: ExecutionContext) {
+  async fetch(request: Request, env: {}, executionCtx: ExecutionContext) {
+    const db = createDrizzle();
+
     const auth = authorizer({
       storage: CloudflareStorage({
         namespace: Resource.KV,
@@ -21,24 +24,43 @@ export default {
           scopes: ["user:email", "read:user"],
         }),
       },
+      success: async (ctx, value) => {
+        if (value.provider === "github") {
+          const response = await fetch("https://api.github.com/user", {
+            headers: {
+              "User-Agent": "EverythingApp",
+              "X-GitHub-Api-Version": "2022-11-28",
+              Authorization: `Bearer ${value.tokenset.access}`,
+              Accept: "application/vnd.github+json",
+            },
+          });
 
-      success: (ctx) => {
-        return ctx.subject("user", { userId: "test" });
+          const githubUser = v.parse(GithubUser, await response.json());
+          const existingUser = await User.fromGithubId(githubUser.id);
+
+          if (existingUser) {
+            return ctx.subject("user", { userId: existingUser.id });
+          }
+
+          const user = await User.create({
+            name: githubUser.name,
+            email: githubUser.email,
+            githubId: githubUser.id,
+          });
+
+          return ctx.subject("user", { userId: user.id });
+        }
+
+        return ctx.subject("anonymous", {});
       },
     });
 
-    const response = await new Hono()
-      .use(
-        "/*",
-        cors({
-          origin: ["http://localhost:3001"],
-          allowHeaders: ["authorization"],
-          allowMethods: ["GET", "OPTIONS"],
-        })
-      )
-      .route("/", auth)
-      .fetch(request, env, ctx);
-
-    return response;
+    return auth.fetch(request, env, executionCtx);
   },
 };
+
+const GithubUser = v.object({
+  id: v.number(),
+  name: v.string(),
+  email: v.nullable(v.string()),
+});

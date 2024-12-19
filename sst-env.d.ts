@@ -7,6 +7,12 @@ export {}
 import "sst"
 declare module "sst" {
   export interface Resource {
+    "Cloudflare": {
+      "accountId": string
+      "databaseId": string
+      "token": string
+      "type": "sst.sst.Linkable"
+    }
     "GithubClientId": {
       "type": "sst.sst.Secret"
       "value": string
@@ -31,6 +37,7 @@ declare module "sst" {
   export interface Resource {
     "Api": cloudflare.Service
     "Auth": cloudflare.Service
+    "DB": cloudflare.D1Database
     "KV": cloudflare.KVNamespace
   }
 }

@@ -1,0 +1,17 @@
+{
+  "name": "@everything/ui",
+  "module": "src/index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@tamagui/core": "1.120.2",
+    "react": "19.0.0",
+    "react-native": "0.76.5",
+    "tamagui": "1.120.2"
+  }
+}

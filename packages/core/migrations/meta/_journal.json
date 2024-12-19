@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1734561179908,
+      "tag": "0000_puzzling_roxanne_simpson",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1734561323420,
+      "tag": "0001_nostalgic_leader",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1734561681016,
+      "tag": "0002_flashy_microchip",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1734566734990,
+      "tag": "0003_luxuriant_wrecker",
+      "breakpoints": true
+    }
+  ]
+}

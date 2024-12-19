@@ -6,18 +6,36 @@ export const Route = createFileRoute("/")({
   component: HomeComponent,
 
   loader: async () => {
-    const response = await api.auth.me.$get();
-
-    const user = await response.text();
+    const response = await api.list.$get();
+    const { lists } = await response.json();
 
     return {
-      user,
+      lists,
     };
   },
 });
 
 function HomeComponent() {
-  const { user } = Route.useLoaderData();
+  const { lists } = Route.useLoaderData();
 
-  return <div className="p-2">{JSON.stringify(user)}</div>;
+  return (
+    <div className="p-2">
+      <button
+        onClick={() => {
+          api.list.$post({
+            json: {
+              title: "New List",
+            },
+          });
+        }}
+      >
+        Create button
+      </button>
+      <ul>
+        {lists.map((list) => (
+          <li key={list.id}>{list.title}</li>
+        ))}
+      </ul>
+    </div>
+  );
 }
